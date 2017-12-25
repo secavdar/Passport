@@ -15,8 +15,8 @@ namespace Passport.Business.Extension
             {
                 x.Run(async context =>
                 {
-                    var controller = new ConnectService(tokenRepository);
-                    await controller.GetResponse(context);
+                    var service = new ConnectService(tokenRepository);
+                    await service.GetResponse(context);
                 });
             });
 
