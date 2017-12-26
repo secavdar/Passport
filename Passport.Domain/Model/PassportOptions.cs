@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Passport.Domain.Model
 {
-    public class JwtIssuerOptions
+    public class PassportOptions
     {
         public string Issuer { get; set; }
         public string Subject { get; set; }

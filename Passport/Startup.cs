@@ -32,7 +32,7 @@ namespace Passport
                 .AddInMemoryClients(Clients.Get());
 
             // Configure JwtIssuerOptions
-            services.Configure<JwtIssuerOptions>(options =>
+            services.Configure<PassportOptions>(options =>
             {
                 options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });

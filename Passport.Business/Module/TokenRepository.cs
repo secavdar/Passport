@@ -13,17 +13,17 @@ namespace Passport.Business.Module
 {
     public class TokenRepository : ITokenRepository
     {
-        private readonly JwtIssuerOptions _jwtOptions;
+        private readonly PassportOptions _options;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IServiceProvider _serviceProvider;
 
-        public TokenRepository(IOptions<JwtIssuerOptions> jwtOptions, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+        public TokenRepository(IOptions<PassportOptions> options, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
         {
             _httpContextAccessor = httpContextAccessor;
-            _jwtOptions = jwtOptions.Value;
+            _options = options.Value;
             _serviceProvider = serviceProvider;
 
-            ThrowIfInvalidOptions(_jwtOptions);
+            ThrowIfInvalidOptions(_options);
         }
 
         public TokenResponse Generate(TokenInput tokenInput)
@@ -37,9 +37,9 @@ namespace Passport.Business.Module
             var jwt = new JwtSecurityToken(
                 issuer: _httpContextAccessor.HttpContext.Request.Host.Value,
                 audience: _httpContextAccessor.HttpContext.Request.Host.Value,
-                notBefore: _jwtOptions.NotBefore,
-                expires: _jwtOptions.Expiration,
-                signingCredentials: _jwtOptions.SigningCredentials);
+                notBefore: _options.NotBefore,
+                expires: _options.Expiration,
+                signingCredentials: _options.SigningCredentials);
 
             jwt.Payload.Add("client_id", client.Id);
             jwt.Payload.Add("scope", client.AllowedScopes);
@@ -49,28 +49,28 @@ namespace Passport.Business.Module
             return new TokenResponse
             {
                 AccessToken = encodedJwt,
-                ExpiersIn = (int)_jwtOptions.ValidFor.TotalSeconds,
+                ExpiersIn = (int)_options.ValidFor.TotalSeconds,
                 TokenType = "Bearer"
             };
         }
 
-        private void ThrowIfInvalidOptions(JwtIssuerOptions options)
+        private void ThrowIfInvalidOptions(PassportOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
 
             if (options.ValidFor <= TimeSpan.Zero)
             {
-                throw new ArgumentException("Must be a non-zero TimeSpan.", nameof(JwtIssuerOptions.ValidFor));
+                throw new ArgumentException("Must be a non-zero TimeSpan.", nameof(PassportOptions.ValidFor));
             }
 
             if (options.SigningCredentials == null)
             {
-                throw new ArgumentNullException(nameof(JwtIssuerOptions.SigningCredentials));
+                throw new ArgumentNullException(nameof(PassportOptions.SigningCredentials));
             }
 
             if (options.JtiGenerator == null)
             {
-                throw new ArgumentNullException(nameof(JwtIssuerOptions.JtiGenerator));
+                throw new ArgumentNullException(nameof(PassportOptions.JtiGenerator));
             }
         }
     }
