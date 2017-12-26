@@ -10,7 +10,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IPassportBuilder AddPassportServer(this IServiceCollection services)
         {
             services.AddTransient<ITokenRepository, TokenRepository>();
-            services.AddTransient<ICryptoRepository, CryptoRepository>();
 
             return new PassportBuilder(services);
         }
