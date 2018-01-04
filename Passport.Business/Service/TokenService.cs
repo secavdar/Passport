@@ -7,21 +7,37 @@ using System.Threading.Tasks;
 
 namespace Passport.Business.Service
 {
-    public class ConnectService : BaseService
+    public class TokenService : BaseService
     {
         private readonly ITokenRepository _tokenRepository;
 
-        public ConnectService(ITokenRepository tokenRepository)
+        public TokenService(ITokenRepository tokenRepository)
         {
             _tokenRepository = tokenRepository;
         }
 
-        public Task GetResponse(HttpContext httpContext)
+        public Task Generate(HttpContext httpContext)
         {
             try
             {
-                var input = ReadBody<TokenInput>(httpContext, "POST");
+                var input = ReadBody<TokenRequest>(httpContext, "POST");
                 var result = _tokenRepository.Generate(input);
+                WriteResponse(httpContext, result);
+            }
+            catch (Exception ex)
+            {
+                WriteErrorResponse(httpContext, ex);
+            }
+
+            return Task.FromResult(0);
+        }
+
+        public Task Validate(HttpContext httpContext)
+        {
+            try
+            {
+                var input = ReadBody<ValidateToken>(httpContext, "POST");
+                var result = _tokenRepository.Validate(input);
                 WriteResponse(httpContext, result);
             }
             catch (Exception ex)

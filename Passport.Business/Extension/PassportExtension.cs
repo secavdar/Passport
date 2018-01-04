@@ -11,12 +11,21 @@ namespace Passport.Business.Extension
         {
             var tokenRepository = app.ApplicationServices.GetService<ITokenRepository>();
 
-            app.Map("/connect/token", x =>
+            app.Map("/token/generate", x =>
             {
                 x.Run(async context =>
                 {
-                    var service = new ConnectService(tokenRepository);
-                    await service.GetResponse(context);
+                    var service = new TokenService(tokenRepository);
+                    await service.Generate(context);
+                });
+            });
+
+            app.Map("/token/validate", x =>
+            {
+                x.Run(async context =>
+                {
+                    var service = new TokenService(tokenRepository);
+                    await service.Validate(context);
                 });
             });
 

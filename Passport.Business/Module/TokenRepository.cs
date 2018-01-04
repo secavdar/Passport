@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Passport.Business.Contract;
 using Passport.Business.Extension;
 using Passport.Domain.Model;
@@ -8,6 +9,7 @@ using Passport.Domain.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 
 namespace Passport.Business.Module
 {
@@ -22,14 +24,12 @@ namespace Passport.Business.Module
             _httpContextAccessor = httpContextAccessor;
             _options = options.Value;
             _serviceProvider = serviceProvider;
-
-            ThrowIfInvalidOptions(_options);
         }
 
-        public TokenResponse Generate(TokenInput tokenInput)
+        public TokenResponse Generate(TokenRequest tokenRequest)
         {
             var clients = _serviceProvider.GetService<IEnumerable<Client>>();
-            var client = clients.IsMatch(tokenInput);
+            var client = clients.IsMatch(tokenRequest);
 
             if (client == null)
                 throw new InvalidOperationException("Client is not valid");
@@ -41,7 +41,7 @@ namespace Passport.Business.Module
                 expires: _options.Expiration,
                 signingCredentials: _options.SigningCredentials);
 
-            jwt.Payload.Add("client_id", client.Id);
+            jwt.Payload.Add("clientId", client.Id);
             jwt.Payload.Add("scope", client.AllowedScopes);
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
@@ -53,24 +53,35 @@ namespace Passport.Business.Module
                 TokenType = "Bearer"
             };
         }
-
-        private void ThrowIfInvalidOptions(PassportOptions options)
+        public ValidateResponse Validate(ValidateToken validateToken)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-
-            if (options.ValidFor <= TimeSpan.Zero)
+            var validationParameters = new TokenValidationParameters
             {
-                throw new ArgumentException("Must be a non-zero TimeSpan.", nameof(PassportOptions.ValidFor));
+                IssuerSigningKey = _options.SigningCredentials.Key,
+                ValidateAudience = false,
+                ValidateIssuer = true,
+                ValidIssuer = validateToken.Issuer
+            };
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(validateToken.AccessToken, validationParameters, out var securityToken);
+                var jwt = (JwtSecurityToken)securityToken;
+
+                return new ValidateResponse
+                {
+                    Claims = jwt.Claims
+                                .Where(x => x.Type != "scope")
+                                .ToDictionary(x => x.Type, x => x.Value),
+                    AllowedScopes = jwt.Claims
+                                       .Where(x => x.Type == "scope")
+                                       .Select(x => x.Value)
+                                       .ToList()
+                };
             }
-
-            if (options.SigningCredentials == null)
+            catch
             {
-                throw new ArgumentNullException(nameof(PassportOptions.SigningCredentials));
-            }
-
-            if (options.JtiGenerator == null)
-            {
-                throw new ArgumentNullException(nameof(PassportOptions.JtiGenerator));
+                return null;
             }
         }
     }

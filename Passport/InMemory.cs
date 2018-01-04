@@ -18,7 +18,8 @@ namespace Passport
                     Secret = "secret",
                     AllowedScopes = new List<string>
                     {
-                        "Middleware.TRV"
+                        "Middleware.TRV",
+                        "Middleware.HRP"
                     }
                 }
             };

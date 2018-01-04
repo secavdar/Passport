@@ -4,6 +4,7 @@ namespace Passport.Business.Contract
 {
     public interface ITokenRepository
     {
-        TokenResponse Generate(TokenInput tokenInput);
+        TokenResponse Generate(TokenRequest tokenInput);
+        ValidateResponse Validate(ValidateToken validateToken);
     }
 }

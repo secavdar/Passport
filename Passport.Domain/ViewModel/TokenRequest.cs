@@ -2,9 +2,9 @@
 
 namespace Passport.Domain.ViewModel
 {
-    public class TokenInput
+    public class TokenRequest
     {
-        public GrantType GrantType { get; set; }
+        public string GrantType { get; set; }
         public string Scope { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
