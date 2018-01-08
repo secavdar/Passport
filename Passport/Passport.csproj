@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Passport.Business\Passport.Business.csproj" />
     <ProjectReference Include="..\Passport.Domain\Passport.Domain.csproj" />
+    <ProjectReference Include="..\Passport.Presentation\Passport.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

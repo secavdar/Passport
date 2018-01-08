@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Passport.Business.Contract;
-using Passport.Business.Extension;
-using Passport.Domain.Model;
+using Passport.Domain;
 using Passport.Domain.ViewModel;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 
@@ -18,18 +15,19 @@ namespace Passport.Business.Module
         private readonly PassportOptions _options;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IClientRepository _clientRepository;
 
-        public TokenRepository(IOptions<PassportOptions> options, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
+        public TokenRepository(IOptions<PassportOptions> options, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider, IClientRepository clientRepository)
         {
             _httpContextAccessor = httpContextAccessor;
             _options = options.Value;
             _serviceProvider = serviceProvider;
+            _clientRepository = clientRepository;
         }
 
         public TokenResponse Generate(TokenRequest tokenRequest)
         {
-            var clients = _serviceProvider.GetService<IEnumerable<Client>>();
-            var client = clients.IsMatch(tokenRequest);
+            var client = _clientRepository.GetMatched(tokenRequest);
 
             if (client == null)
                 throw new InvalidOperationException("Client is not valid");
@@ -41,7 +39,7 @@ namespace Passport.Business.Module
                 expires: _options.Expiration,
                 signingCredentials: _options.SigningCredentials);
 
-            jwt.Payload.Add("clientId", client.Id);
+            jwt.Payload.Add("clientId", client.ClientId);
             jwt.Payload.Add("scope", client.AllowedScopes);
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);

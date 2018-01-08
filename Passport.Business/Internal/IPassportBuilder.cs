@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Passport.Business.Contract
+namespace Passport.Business.Internal
 {
     public interface IPassportBuilder
     {

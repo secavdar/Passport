@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Passport.Domain.Model
+namespace Passport.Domain
 {
     public class PassportOptions
     {

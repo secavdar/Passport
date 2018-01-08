@@ -1,18 +1,18 @@
-﻿using Passport.Domain.Model;
-using Passport.Domain.Type;
+﻿using Passport.Domain.Type;
+using Passport.Domain.ViewModel;
 using System.Collections.Generic;
 
 namespace Passport
 {
     public class Clients
     {
-        public static IEnumerable<Client> Get()
+        public static IEnumerable<ClientVm> Get()
         {
-            return new List<Client>
+            return new List<ClientVm>
             {
-                new Client
+                new ClientVm
                 {
-                    Id = "TRV",
+                    ClientId = "TRV",
                     Name = "TRV",
                     GrantType = GrantType.ClientCredentials,
                     Secret = "secret",
@@ -21,6 +21,25 @@ namespace Passport
                         "Middleware.TRV",
                         "Middleware.HRP"
                     }
+                }
+            };
+        }
+    }
+    public class Scopes
+    {
+        public static IEnumerable<ScopeVm> Get()
+        {
+            return new List<ScopeVm>
+            {
+                new ScopeVm
+                {
+                    Name = "Middleware.TRV",
+                    Description = "Middleware.TRV"
+                },
+                new ScopeVm
+                {
+                    Name = "Middleware.HRP",
+                    Description = "Middleware.HRP"
                 }
             };
         }

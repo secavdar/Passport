@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Passport.Business.Contract;
 using System;
 
-namespace Passport.Business.Module
+namespace Passport.Business.Internal
 {
     public class PassportBuilder : IPassportBuilder
     {
